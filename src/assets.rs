@@ -4,7 +4,10 @@ use sfml::{graphics::Texture, SfBox};
 
 pub const TEXTURES: &'static [&'static str] = &[
     // PUT TEXTURE HERE
-    "ship.png", "go1.png", "bg.jpg",
+    "ship.png",
+    "go1.png",
+    "bg.jpg",
+    "bang1.png",
 ];
 
 pub struct AssetManager {

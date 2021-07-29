@@ -2,11 +2,13 @@ use assets::AssetManager;
 use game::Game;
 
 mod assets;
+mod bullet;
 mod game;
 mod game_obj;
 mod player;
 
 // TODO bullet struct and logic
+// TODO fix spawn asteroids at right border of the window
 // TODO objects kind (meteor fuel ammo health ...?)
 // TODO gui (hp bar, fuel bar ammo bar disnace to finish???)
 // TODO main menu (replay quit setting)

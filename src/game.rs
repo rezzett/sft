@@ -1,6 +1,6 @@
 use sfml::{
     graphics::{Color, RenderTarget, RenderWindow, Sprite},
-    window::{Event, Key, Style},
+    window::{mouse::Button, Event, Key, Style},
 };
 
 use rand::Rng;
@@ -81,12 +81,23 @@ impl<'a> Game<'a> {
             en.update();
         }
 
-        // remove objects they insersect the player
+        // fire
+        if Button::LEFT.is_pressed() {
+            self.player.fire(self.asset_manager.get_texture("bang1"));
+        }
+
+        // remove object if it intersection with bullet
+        for b in self.player.get_bullets() {
+            self.enemies
+                .retain(|e| e.get_bounds().intersection(&b.get_bounds()).is_none());
+        }
+
+        // remove objects if they insersect the player
         let player_border = self.player.get_bounds();
         self.enemies
             .retain(|e| e.get_bounds().intersection(&player_border).is_none());
 
-        // remove objects at the bottom of wndow
+        // remove objects at the bottom of window
         let bottom_border = self.win.size().y as f32;
         self.enemies
             .retain(|e| e.get_bounds().top + e.get_bounds().height < bottom_border);
