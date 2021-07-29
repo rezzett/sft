@@ -1,5 +1,5 @@
 use sfml::{
-    graphics::{Color, RenderTarget, RenderWindow, Sprite, Texture},
+    graphics::{Color, RenderTarget, RenderWindow, Sprite},
     window::{Event, Key, Style},
 };
 
@@ -8,34 +8,33 @@ use rand::Rng;
 const MAX_ENEMIES: usize = 10;
 const SPAVN_ENEMY_DELAY: f32 = 10.;
 
-use crate::game_obj::GameObj;
 use crate::player::Player;
+use crate::{assets::AssetManager, game_obj::GameObj};
 
 pub struct Game<'a> {
     win: RenderWindow,
     player: Player<'a>,
-    enemy_tex: &'a Texture,
     enemies: Vec<GameObj<'a>>,
     spawn_enemy_timer: f32,
-    bg: &'a Texture,
     bg_obj: Sprite<'a>,
+    asset_manager: &'a AssetManager,
 }
 
 impl<'a> Game<'a> {
-    pub fn new(tex: &'a Texture, go_tex: &'a Texture, bg: &'a Texture) -> Self {
+    pub fn new(asset_manager: &'a AssetManager) -> Self {
         let mut game = Game {
             win: RenderWindow::new((800, 600), "sft", Style::CLOSE, &Default::default()),
             player: Player::new(),
             enemies: vec![],
             spawn_enemy_timer: 0.,
-            enemy_tex: go_tex,
             bg_obj: Sprite::new(),
-            bg,
+            asset_manager,
         };
-        game.bg_obj.set_texture(&bg, true);
+        game.bg_obj
+            .set_texture(asset_manager.get_texture("bg"), true);
         game.win.set_framerate_limit(60);
         game.win.set_vertical_sync_enabled(false);
-        game.player.set_texture(&tex);
+        game.player.set_texture(asset_manager.get_texture("ship"));
         game
     }
 
@@ -65,7 +64,7 @@ impl<'a> Game<'a> {
     fn spawn_enemies(&mut self) {
         if self.spawn_enemy_timer > SPAVN_ENEMY_DELAY {
             if self.enemies.len() < MAX_ENEMIES {
-                let mut en = GameObj::new(&self.enemy_tex);
+                let mut en = GameObj::new(self.asset_manager.get_texture("go1"));
                 en.set_position((self.dice(0, self.win.size().x), 0.));
                 self.enemies.push(en);
                 self.spawn_enemy_timer = 0.;
