@@ -1,19 +1,27 @@
 use sfml::graphics::{FloatRect, RenderTarget, Sprite, Texture, Transformable};
 
+use crate::game::GameObjKind;
+
 #[derive(Clone)]
 pub struct GameObj<'a> {
     sprite: Sprite<'a>,
     speed: f32,
+    kind: GameObjKind,
 }
 
 impl<'a> GameObj<'a> {
-    pub fn new(texture: &'a Texture) -> Self {
+    pub fn new(texture: &'a Texture, kind: GameObjKind) -> Self {
         let mut enemy = Self {
             sprite: Sprite::with_texture(&texture),
             speed: 4.,
+            kind,
         };
         enemy.sprite.set_scale((0.1, 0.1));
         enemy
+    }
+
+    pub fn get_kind(&self) -> GameObjKind {
+        self.kind
     }
 
     pub fn get_bounds(&self) -> FloatRect {

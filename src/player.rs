@@ -7,6 +7,8 @@ use crate::bullet::Bullet;
 
 const MAX_BULLETS: usize = 20;
 const FIRE_KD: f32 = 30.;
+const MAX_HULL: i32 = 120;
+const MAX_FUEL: f32 = 120.;
 
 pub struct Player<'a> {
     sprite: Sprite<'a>,
@@ -14,6 +16,8 @@ pub struct Player<'a> {
     bullets: Vec<Bullet<'a>>,
     fire_kd: f32,
     bullet_count: usize,
+    hull: i32,
+    fuel: f32,
 }
 
 impl<'a> Player<'a> {
@@ -24,6 +28,8 @@ impl<'a> Player<'a> {
             bullets: vec![],
             fire_kd: 0.,
             bullet_count: MAX_BULLETS,
+            hull: MAX_HULL,
+            fuel: MAX_FUEL,
         };
         player.sprite.set_position((100., 100.));
         player.sprite.set_scale((0.1, 0.1));
@@ -33,6 +39,7 @@ impl<'a> Player<'a> {
     pub fn fire(&mut self, texture: &'a Texture) {
         if self.fire_kd > FIRE_KD {
             if self.bullet_count > 0 {
+                self.bullet_count -= 1;
                 self.bullets.push(Bullet::new(
                     texture,
                     (
@@ -45,6 +52,39 @@ impl<'a> Player<'a> {
         }
     }
 
+    pub fn take_dmg(&mut self, dmg: i32) {
+        self.hull -= dmg;
+    }
+
+    pub fn repear_hull(&mut self, metal: i32) {
+        self.hull += metal;
+        if self.hull > MAX_HULL {
+            self.hull = MAX_HULL
+        }
+    }
+
+    pub fn restore_weapon(&mut self, plasma: i32) {
+        self.bullet_count = plasma as usize;
+        if self.bullet_count > MAX_BULLETS {
+            self.bullet_count = MAX_BULLETS;
+        }
+    }
+
+    pub fn refill_fuel(&mut self, hydrogen: f32) {
+        self.fuel = hydrogen;
+        if self.fuel > MAX_FUEL {
+            self.fuel = MAX_FUEL;
+        }
+    }
+
+    pub fn get_hull(&self) -> i32 {
+        self.hull
+    }
+
+    pub fn get_fuel(&self) -> f32 {
+        self.fuel
+    }
+
     pub fn set_texture(&mut self, texture: &'a Texture) {
         self.sprite.set_texture(&texture, true);
     }
@@ -53,6 +93,7 @@ impl<'a> Player<'a> {
         self.move_handler();
         self.check_win_bounds(target);
         self.fire_kd += 1.;
+        self.fuel -= 0.01;
 
         for b in self.bullets.iter_mut() {
             b.update();

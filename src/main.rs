@@ -7,13 +7,12 @@ mod game;
 mod game_obj;
 mod player;
 
-// TODO bullet struct and logic
-// TODO fix spawn asteroids at right border of the window
-// TODO objects kind (meteor fuel ammo health ...?)
+// TODO add texture for different kins of obj
 // TODO gui (hp bar, fuel bar ammo bar disnace to finish???)
 // TODO main menu (replay quit setting)
 // TODO audio for shoot and colision + bg sound
 // TODO score (max distance?) and save score to file
+// TODO load/save settings asset data from file
 
 fn main() {
     let mut asset_manager = AssetManager::new();

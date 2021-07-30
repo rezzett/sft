@@ -11,6 +11,14 @@ const SPAVN_ENEMY_DELAY: f32 = 10.;
 use crate::player::Player;
 use crate::{assets::AssetManager, game_obj::GameObj};
 
+#[derive(Clone, Copy, Debug)]
+pub enum GameObjKind {
+    Default,
+    Plasma,
+    Iron,
+    Hidrogen,
+}
+
 pub struct Game<'a> {
     win: RenderWindow,
     player: Player<'a>,
@@ -64,8 +72,23 @@ impl<'a> Game<'a> {
     fn spawn_enemies(&mut self) {
         if self.spawn_enemy_timer > SPAVN_ENEMY_DELAY {
             if self.enemies.len() < MAX_ENEMIES {
-                let mut en = GameObj::new(self.asset_manager.get_texture("go1"));
-                en.set_position((self.dice(0, self.win.size().x), 0.));
+                let mut en = match Game::dice(0, 100) as i32 {
+                    40..=60 => {
+                        GameObj::new(self.asset_manager.get_texture("go1"), GameObjKind::Iron)
+                    }
+                    61..=80 => {
+                        GameObj::new(self.asset_manager.get_texture("go1"), GameObjKind::Hidrogen)
+                    }
+                    81..=100 => {
+                        GameObj::new(self.asset_manager.get_texture("go1"), GameObjKind::Plasma)
+                    }
+                    _ => GameObj::new(self.asset_manager.get_texture("go1"), GameObjKind::Default),
+                };
+
+                en.set_position((
+                    Game::dice(0, self.win.size().x - en.get_bounds().width as u32),
+                    0.,
+                ));
                 self.enemies.push(en);
                 self.spawn_enemy_timer = 0.;
             }
@@ -92,6 +115,29 @@ impl<'a> Game<'a> {
                 .retain(|e| e.get_bounds().intersection(&b.get_bounds()).is_none());
         }
 
+        // itneraction object with player
+        for e in self.enemies.iter() {
+            if e.get_bounds()
+                .intersection(&self.player.get_bounds())
+                .is_some()
+            {
+                match e.get_kind() {
+                    GameObjKind::Default => {
+                        self.player.take_dmg((Game::dice(1, 5) + 5.) as i32);
+                    }
+                    GameObjKind::Iron => {
+                        self.player.repear_hull((Game::dice(1, 8) + 3.) as i32);
+                    }
+                    GameObjKind::Plasma => {
+                        self.player.restore_weapon((Game::dice(1, 10) + 5.) as i32);
+                    }
+                    GameObjKind::Hidrogen => {
+                        self.player.refill_fuel(Game::dice(1, 8) + 2.);
+                    }
+                }
+            }
+        }
+
         // remove objects if they insersect the player
         let player_border = self.player.get_bounds();
         self.enemies
@@ -115,7 +161,7 @@ impl<'a> Game<'a> {
         self.win.display();
     }
 
-    fn dice(&self, from: u32, to: u32) -> f32 {
+    fn dice(from: u32, to: u32) -> f32 {
         rand::thread_rng().gen_range(from..to) as f32
     }
 }
